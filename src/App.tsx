@@ -1,26 +1,98 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {ChatClient} from './chat-client'
 import './App.css';
 
+// web socket url on aws
+const URL = 'wss://44dsc4exbi.execute-api.us-east-1.amazonaws.com/production'
+
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const socket = useRef<WebSocket | null>(null)
+  const [isConnected, setIsConnected] = useState(false)
+  const [members, setMembers] = useState([
+  ])
+  const [chatRows, setChatRows] = useState<React.ReactNode[]>([
+  ])
+
+  const onSocketOpen = useCallback(() => {
+    setIsConnected(true)
+    const name = prompt('Enter your name')
+    socket.current?.send(JSON.stringify({
+      action: 'setName',
+      name,
+    }))
+  }, [])
+
+  const onSocketClose = useCallback(() => {
+    setIsConnected(false)
+  }, [])
+
+  const onSocketMessage = useCallback((dataStr: any) => {
+    const data = JSON.parse(dataStr)
+    if (data.members) {
+      setMembers(data.members)
+    } else if(data.publicMessage) {
+      setChatRows(oldArray => [...oldArray, <span><b>{data.publicMessage}</b></span>])
+    } else if(data.privateMessage) {
+      alert(data.privateMessage)
+    } else if(data.systemMessage) {
+      setChatRows(oldArray => [...oldArray, <span><b>{data.systemMessage}</b></span>])
+    }
+  }, [])
+
+  const onConnect = useCallback(() => {
+    if (socket.current?.readyState !== WebSocket.OPEN) {
+      socket.current = new WebSocket(URL)
+      socket.current.addEventListener('open', onSocketOpen)
+      socket.current.addEventListener('close', onSocketClose)
+      socket.current.addEventListener('message', (event) => {
+        onSocketMessage(event.data)
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      socket.current?.close()
+    }
+  }, [])
+
+  const onSendPrivateMessage = useCallback((to: string) => {
+    /*
+      
+    */
+
+    const message = prompt('Enter private message for ' + to);
+    socket.current?.send(JSON.stringify({
+      action: 'sendPrivate',
+      message,
+      to
+    }))
+  }, [])
+  
+  const onSendPublicMessage = useCallback(() => {
+    const message = prompt('Enter public message for');
+    socket.current?.send(JSON.stringify({
+      action: 'sendPublic',
+      message
+    }))
+  }, [])
+
+  const onDisconnect = useCallback(() => {
+    socket.current?.close()
+    setMembers([])
+    setChatRows([])
+  }, [isConnected])
+
+  return <ChatClient
+    isConnected={isConnected}
+    members={members}
+    chatRows={chatRows}
+    onPublicMessage={onSendPublicMessage}
+    onPrivateMessage={onSendPrivateMessage}
+    onConnect={onConnect}
+    onDisconnect={onDisconnect}
+  />;
+
 }
 
 export default App;
