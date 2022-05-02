@@ -1,11 +1,21 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useEffect, useCallback, useRef, useContext} from 'react';
 import {ChatClient} from './chat-helper'
+import { AccountContext } from './Account';
 
 
 // web socket url on aws
 const URL = 'wss://44dsc4exbi.execute-api.us-east-1.amazonaws.com/production'
 
 function Chat() {
+  const { getSession }: any = useContext(AccountContext)
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    getSession().then(() => {
+      setLoggedIn(true)
+    })
+  })
+
   const socket = useRef<WebSocket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [members, setMembers] = useState([
@@ -57,10 +67,7 @@ function Chat() {
   }, [])
 
   const onSendPrivateMessage = useCallback((to: string) => {
-    /*
-      
-    */
-
+   
     const message = prompt('Enter private message for ' + to);
     socket.current?.send(JSON.stringify({
       action: 'sendPrivate',
@@ -83,15 +90,23 @@ function Chat() {
     setChatRows([])
   }, [isConnected])
 
-  return <ChatClient
-    isConnected={isConnected}
-    members={members}
-    chatRows={chatRows}
-    onPublicMessage={onSendPublicMessage}
-    onPrivateMessage={onSendPrivateMessage}
-    onConnect={onConnect}
-    onDisconnect={onDisconnect}
-  />;
+  return (
+    <div>
+      {loggedIn && (
+        <ChatClient
+        isConnected={isConnected}
+        members={members}
+        chatRows={chatRows}
+        onPublicMessage={onSendPublicMessage}
+        onPrivateMessage={onSendPrivateMessage}
+        onConnect={onConnect}
+        onDisconnect={onDisconnect}
+      />
+      )}
+      
+    </div>
+    
+  )
 
 }
 

@@ -1,6 +1,10 @@
 import { CognitoUserAttribute, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
 import UserPool from '../UserPool'
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer, useEffect, useContext } from 'react';
+import { AnimatePresence, motion } from 'framer-motion'
+import { AccountContext } from './Account';
+
+// Design libraries
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
@@ -8,6 +12,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import CardHeader from '@material-ui/core/CardHeader';
 import Button from '@material-ui/core/Button';
+
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -105,80 +110,77 @@ export const Login = () => {
             Value: email
         })
     ]
+
+    const { authenticate }: any = useContext(AccountContext)
     
     const onSubmit = (event: any) => {
-        event.preventDefault();
+      event.preventDefault();
 
-       const user = new CognitoUser({
-         Username: email,
-         Pool: UserPool
-       })
-
-       const authDetails = new AuthenticationDetails({
-          Username: email,
-          Password: password
-      })
-
-    user.authenticateUser(authDetails, {
-      onSuccess: (data) => {
-        console.log("onSuccess: ", data);
-      },
-      onFailure: (err: any) => {
-        console.error("onFailure: ", err)
-      },
-      newPasswordRequired: (data: any) => {
-        console.log("newPasswordRequired: ", data)
-      },
-    })
+      authenticate(email, password)
+        .then((data: any) => {
+          console.log("Logged in!", data)
+        })
+        .catch((err: any) => {
+          console.error("Failed to login", err)
+        }) 
 
     };
 
     return (
-      <div>
-          <form onSubmit={onSubmit} className={classes.container} noValidate autoComplete="off">
-              <Card className={classes.card}>
-                  <CardHeader className={classes.header} title="Secure Chat" />
-                  <CardContent>
-                      <div>
-                          <TextField
-                          error={state.isError}
-                          fullWidth
-                          id="username"
-                          type="email"
-                          value={email}
-                          label="Username"
-                          placeholder="Username"
-                          margin="normal"
-                          onChange={(event) => setEmail(event.target.value)}
-                          />
-                          <TextField
-                          error={state.isError}
-                          fullWidth
-                          id="password"
-                          type="password"
-                          value={password}
-                          label="Password"
-                          placeholder="Password"
-                          margin="normal"
-                          helperText={state.helperText}
-                          onChange={(event) => setPassword(event.target.value)}
-                          />
-                      </div>
-                  </CardContent>
-                  <CardActions>
-                      <Button
-                          variant="contained"
-                          size="large"
-                          color="secondary"
-                          className={classes.loginBtn}
-                          type="submit"
-                          >
-                          Login
-                      </Button>
-                  </CardActions>
-              </Card>
-          </form>
-      </div>
+      <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1}} 
+            exit={{ opacity: 0 }} 
+        >
+          <div>
+            <form onSubmit={onSubmit} className={classes.container} noValidate autoComplete="off">
+                <Card className={classes.card}>
+                    <CardHeader className={classes.header} title="Secure Chat" />
+                    <CardContent>
+                        <div>
+                            <TextField
+                            error={state.isError}
+                            fullWidth
+                            id="username"
+                            type="email"
+                            value={email}
+                            label="Username"
+                            placeholder="Username"
+                            margin="normal"
+                            onChange={(event) => setEmail(event.target.value)}
+                            />
+                            <TextField
+                            error={state.isError}
+                            fullWidth
+                            id="password"
+                            type="password"
+                            value={password}
+                            label="Password"
+                            placeholder="Password"
+                            margin="normal"
+                            helperText={state.helperText}
+                            onChange={(event) => setPassword(event.target.value)}
+                            />
+                        </div>
+                    </CardContent>
+                    <CardActions>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            color="secondary"
+                            className={classes.loginBtn}
+                            type="submit"
+                            >
+                            Login
+                        </Button>
+                    </CardActions>
+                </Card>
+            </form>
+        </div>
+
+      </motion.div>
+
+      
   )
 }
 
