@@ -1,6 +1,24 @@
 import React, {useState, useEffect, useCallback, useRef, useContext} from 'react';
 import {ChatClient} from './chat-helper'
 import { AccountContext } from './Account';
+var CryptoJS = require("crypto-js");
+var sha256 = require('js-sha256'); 
+ 
+// AES
+function encryptMessage(messageToencrypt: any, secretKey: any) {
+ var encrytedMessage = CryptoJS.AES.encrypt(messageToencrypt, secretKey)
+ return encrytedMessage.toString()
+}
+ 
+function decryptMessage(encryptMessage: any, secretKey: any) {
+ var decryptedBytes = CryptoJS.AES.decrypt(encryptMessage, secretKey)
+ console.log('**DECRYPTED BYTES**', decryptedBytes)
+ var decryptedMessage = decryptedBytes.toString(CryptoJS.enc.Utf8)
+ console.log('INSIDE DECRYPTED FUNCTION: ', decryptMessage)
+ return decryptedMessage
+
+}
+
 
 
 // web socket url on aws
@@ -43,7 +61,12 @@ function Chat() {
     } else if(data.publicMessage) {
       setChatRows(oldArray => [...oldArray, <span><b>{data.publicMessage}</b></span>])
     } else if(data.privateMessage) {
-      alert(data.privateMessage)
+      console.log('MESSAGE RECEIVED (PRIVATE): ', data.privateMessage)
+      const dMessage = decryptMessage(data.privateMessage, 'somekey')
+      console.log('DECRYPTED MESSAGE (PRIVATE): ', dMessage)
+      console.log('HASH RECEIVED (PRVATE): ', data.hash)
+      data.privateMessage = dMessage
+      alert(`${data.person}:  ${data.privateMessage}`)
     } else if(data.systemMessage) {
       setChatRows(oldArray => [...oldArray, <span><b>{data.systemMessage}</b></span>])
     }
@@ -68,16 +91,22 @@ function Chat() {
 
   const onSendPrivateMessage = useCallback((to: string) => {
    
-    const message = prompt('Enter private message for ' + to);
+    let message = prompt('Enter private message for ' + to);
+    var hash = sha256(message)
+    console.log('HASH SENT: ', hash)
+    const eMessage = encryptMessage(message, 'somekey')
+    console.log('ENCRYPTED MESSAGE (PRIVATE): ', eMessage)
+    message = eMessage
     socket.current?.send(JSON.stringify({
       action: 'sendPrivate',
       message,
-      to
+      to,
+      hash
     }))
   }, [])
   
   const onSendPublicMessage = useCallback(() => {
-    const message = prompt('Enter public message for');
+    let message = prompt('Enter public message for');
     socket.current?.send(JSON.stringify({
       action: 'sendPublic',
       message
