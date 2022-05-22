@@ -7,10 +7,10 @@ Brandon Tetley - btetley@csu.fullerton.edu<br/>
 Jose Hernandez - joselhernandez1113@csu.fullerton.edu<br/>
 Justin Galvez - justing@csu.fullerton.edu<br/>
 
-Contributions:
-Project Manager: Jason Anthony
-Front end team: Jose Hernandez and Justin Galvez
-Backend Team: Jason Anthony, David Do, Brandon Tetley
+## Contributions:<br/>
+Project Manager: Jason Anthony<br/>
+Front end team: Jose Hernandez and Justin Galvez<br/>
+Backend Team: Jason Anthony, David Do, Brandon Tetley<br/>
 
 Programming language(s): Typescript (JavaScript)
 
@@ -56,4 +56,3 @@ You will also see any lint errors in the console.
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
-# secure-chat-452-final-project
