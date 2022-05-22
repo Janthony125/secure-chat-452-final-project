@@ -62,7 +62,7 @@ function Chat() {
       setChatRows(oldArray => [...oldArray, <span><b>{data.publicMessage}</b></span>])
     } else if(data.privateMessage) {
       console.log('MESSAGE RECEIVED (PRIVATE): ', data.privateMessage)
-      const dMessage = decryptMessage(data.privateMessage, 'somekey')
+      const dMessage = decryptMessage(data.privateMessage, 'ShVmYq3s6v9y$B&E)H@McQfTjWnZr4u7')
       console.log('DECRYPTED MESSAGE (PRIVATE): ', dMessage)
       console.log('HASH RECEIVED (PRVATE): ', data.hash)
       data.privateMessage = dMessage
@@ -94,7 +94,7 @@ function Chat() {
     let message = prompt('Enter private message for ' + to);
     var hash = sha256(message)
     console.log('HASH SENT: ', hash)
-    const eMessage = encryptMessage(message, 'somekey')
+    const eMessage = encryptMessage(message, 'ShVmYq3s6v9y$B&E)H@McQfTjWnZr4u7')
     console.log('ENCRYPTED MESSAGE (PRIVATE): ', eMessage)
     message = eMessage
     socket.current?.send(JSON.stringify({
