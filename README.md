@@ -26,7 +26,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## How to run project
 
-In the project directory, you can run (Please run in the following order):
+In the project directory, you can run (Please run in the following order in the terminal):
 
 
 ### `yarn`
